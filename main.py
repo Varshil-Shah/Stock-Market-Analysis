@@ -14,8 +14,22 @@ def get_name_of_stock(element: bs4.element) -> str:
     """
     prev_element = element.previous_sibling
     company_name = prev_element.find("h1").text
-    print(company_name)
     return company_name
+
+
+def get_table_summary(element: bs4.element) -> list[dict]:
+    """
+    Loop all the <tr> in element
+    :param element: bs4.element
+    :return: list[dict]
+    """
+    details = []
+    all_tr = element.find_all("tr")
+    for tr in all_tr:
+        all_td = tr.find_all("td")
+        stock_detail = {tr.td.span.text: all_td[1].text}
+        details.append(stock_detail)
+    return details
 
 
 def get_stock_summary(element: bs4.element):
