@@ -2,7 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 import bs4.element
 
-names = ["IRCTC.NS"]
+# names = ["IRCTC.NS"]
+names = ["MSFT", "GOOG", "TSLA", "IRCTC.NS"]
 url = "https://finance.yahoo.com/quote/{0}?p={0}&.tsrc=fin-srch"
 
 
@@ -32,10 +33,30 @@ def get_table_summary(element: bs4.element) -> list[dict]:
     return details
 
 
-def get_stock_summary(element: bs4.element):
+def get_stock_summary(element: bs4.element) -> None:
+    """
+    Fetch the summary portion of the element
+    :param element: bs4.element
+    :return: None
+    """
     available_summaries = element.find_all("div", attrs={"data-test": True})
     left_side_summary = available_summaries[0].table.tbody
     right_side_summary = available_summaries[1].table.tbody
+    print(get_table_summary(left_side_summary))
+    print(get_table_summary(right_side_summary))
+
+
+def get_stock_header(element: bs4.element) -> list[dict]:
+    """
+    Loop all <fin-streamer> in element
+    :param element: bs4.element
+    :return: list[dict]
+    """
+    price_info = []
+    for data in element.find_all("fin-streamer", attrs={"data-field": True}):
+        price_data = {data.attrs['data-field']: data.text}
+        price_info.append(price_data)
+    return price_info
 
 
 def get_live_stock(tickers: list[str]):
@@ -49,10 +70,12 @@ def get_live_stock(tickers: list[str]):
         soup = BeautifulSoup(source, "lxml")
 
         current_stock_data = soup.find("div", class_="My(6px) Pos(r) smartphone_Mt(6px) W(100%)")
-        get_name_of_stock(current_stock_data)
+        print(get_name_of_stock(current_stock_data))
 
         summary = soup.find("div", id="quote-summary")
-        get_stock_summary(summary)
+        print(get_stock_summary(summary))
+
+        print(get_stock_header(current_stock_data))
 
 
 if __name__ == '__main__':
